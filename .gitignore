@@ -1,0 +1,8 @@
+# R specific
+.Rhistory
+.Rproj.user
+.Ruserdata
+.Renviron
+
+# Logs
+*.log
