@@ -5,7 +5,7 @@ account: sccollitt
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10738591
-bundleId: 8021152
+bundleId: 8022591
 url: https://sccollitt.shinyapps.io/census_race_ethnicity_pop_timeseries_map/
 version: 1
 asMultiple: FALSE

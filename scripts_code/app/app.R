@@ -213,11 +213,31 @@ server <- function(input, output, session) {
                                 addPopups(-98.5, 39.5, "No data available for selected group in the selected year.\nPlease refer to the group dropdown menu for available data in a given year.")
                 } else {
                         
-                        # Continuous color scale
+                        # Continuous color scale # picking palette to match ggplot's
                         palette <- colorNumeric(palette = c("#F7FBFF", "#E1EDF8", "#CBDFF1", "#ACD0E6", "#83BADB", "#5AA1CF", "#3987C0", "#1D6AAF", "#084D96", "#08306B"), domain = selected_data)
                         
                         # palette for NAs
                         palette_NA <- colorNumeric(palette = c("#F7FBFF", "#E1EDF8", "#CBDFF1", "#ACD0E6", "#83BADB", "#5AA1CF", "#3987C0", "#1D6AAF", "#084D96", "#08306B"), domain = selected_data, na.color = NA)
+                        
+
+                        # ~~~~~~~~~~~~~~~ state label colors (conditionally color based on luminosity of polygon)
+                        fillColor <- palette(selected_data)
+                        
+                        calculate_luminance <- function(color) {
+                                # Convert hex color to RGB
+                                col <- col2rgb(color) / 255
+                                # Luminance formula
+                                (0.299 * col[1,] + 0.587 * col[2,] + 0.114 * col[3,])
+                        }
+                        
+                        subset_data$labelColors <- sapply(fillColor, function(color) {
+                                luminance <- calculate_luminance(color)
+                                ifelse(luminance < 0.5, "white", "black") # Adjust the 0.5 threshold as needed
+                        })
+                        
+                        black_labels_data <- subset(subset_data, labelColors == "black")
+                        white_labels_data <- subset(subset_data, labelColors == "white")
+                        
                         
                         # Determine the presence of NAs
                         has_na <- any(is.na(selected_data))
@@ -228,7 +248,7 @@ server <- function(input, output, session) {
                         # Title for the legend
                         selected_data_label <- names(data_choices)[which(data_choices == input$selectedDataMap)]
                         
-                        leaflet(options = leafletOptions(maxZoom = 7, minZoom = 4, zoomControl = TRUE,
+                        map <- leaflet(options = leafletOptions(maxZoom = 7, minZoom = 4, zoomControl = TRUE,
                                                          zoomSnap = 0.25, zoomDelta = 0.5),
                                 data = subset_data) %>%
                                 setView(lng = -94.5, lat = 36.5, zoom = 4.25) %>%
@@ -250,20 +270,42 @@ server <- function(input, output, session) {
                                                 formatC(selected_data, format = "f", big.mark = ",", digits = 1)
                                         })
                                 ) %>%
-                                addLabelOnlyMarkers(
-                                        lat = as.numeric(subset_data$latitude),
-                                        lng = as.numeric(subset_data$longitude),
-                                        label = ~state_abb,
-                                        labelOptions = labelOptions(noHide = TRUE, direction = "center", textOnly = TRUE,
-                                                                    style = list(
-                                                                            "color" = "grey3",
-                                                                            "font-size" = "8px"
-                                                                    ))) %>%
                                 addLegend(pal = palette_NA, 
                                           values = selected_data, 
                                           opacity = 1, 
                                           position = "bottomright",
-                                          title = paste0(selected_data_label, ": ", input$selectedGroupMap, " (", input$selectedYear, ")"))}})
+                                          title = paste0(selected_data_label, ": ", input$selectedGroupMap, " (", input$selectedYear, ")"))
+                        # add black labels
+                                if (nrow(black_labels_data) > 0) {
+                                        map <- map %>% addLabelOnlyMarkers(
+                                                data = black_labels_data,
+                                                lng = ~longitude, lat = ~latitude,
+                                                label = ~state_abb,
+                                                labelOptions = labelOptions(
+                                                        noHide = TRUE, 
+                                                        direction = "center", 
+                                                        textOnly = TRUE,
+                                                        style = list("color" = "black")
+                                                )
+                                        )
+                                }
+                        
+                        # Add white labels
+                        if (nrow(white_labels_data) > 0) {
+                                map <- map %>% addLabelOnlyMarkers(
+                                        data = white_labels_data,
+                                        lng = ~longitude, lat = ~latitude,
+                                        label = ~state_abb,
+                                        labelOptions = labelOptions(
+                                                noHide = TRUE, 
+                                                direction = "center", 
+                                                textOnly = TRUE,
+                                                style = list("color" = "white")
+                                        )
+                                )
+                        }
+                                map # return map
+                        }})
         
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAP: BAR CHART ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
