@@ -5,4 +5,4 @@ The resulting app includes data visualizations of historical and contemporary st
 The interactive data visualizations include a timeseries chart, map, and bar chart that corresponds with the map.  
 Users can select among racial/ethnic groups for which data is available, decennial census years, and population statistics.
 
-[Link to the app](https://c100.shinyapps.io/census_race_ethnicity_pop_timeseries_map/)
+[Link to the app](https://sccollitt.shinyapps.io/census_race_ethnicity_pop_timeseries_map/)

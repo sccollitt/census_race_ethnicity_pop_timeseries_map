@@ -1,12 +1,12 @@
 name: census_race_ethnicity_pop_timeseries_map
 title: census_race_ethnicity_pop_timeseries_map
-username: c100
-account: c100
+username: sccollitt
+account: sccollitt
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10738591
-bundleId: 8017570
-url: https://c100.shinyapps.io/census_race_ethnicity_pop_timeseries_map/
+bundleId: 8021152
+url: https://sccollitt.shinyapps.io/census_race_ethnicity_pop_timeseries_map/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
