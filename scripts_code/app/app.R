@@ -10,6 +10,7 @@ library(stringr)
 library(rsconnect)
 library(plotly)
 library(scales)
+library(ggiraph)
 
 # load data
 load("d.ts.rdata")
@@ -68,8 +69,9 @@ replace_na_with_label <- function(data, replacement = "No Data") {
 
 # UI
 ui <- fluidPage(
-        tags$head(includeCSS("www/styles.css")),
-        titlePanel("Race and Ethnicity Across Time and States"),
+        tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"), # include fontawesome for home button icon
+                includeCSS("www/styles.css")),
+        #titlePanel("Race and Ethnicity Across Time and States"),
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PLOT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         fluidRow(id = "linePlotPanel",
                  column(3,
@@ -110,7 +112,7 @@ ui <- fluidPage(
                                     selected = "White")),
                  column(6,
                         leafletOutput("choroplethMap")),
-                 column(4, plotOutput("barChart"))))
+                 column(4, girafeOutput("barChart"))))
 
 # Server
 server <- function(input, output, session) {
@@ -248,10 +250,10 @@ server <- function(input, output, session) {
                         # Title for the legend
                         selected_data_label <- names(data_choices)[which(data_choices == input$selectedDataMap)]
                         
-                        map <- leaflet(options = leafletOptions(maxZoom = 7, minZoom = 4, zoomControl = TRUE,
-                                                         zoomSnap = 0.25, zoomDelta = 0.5),
+                        map <- leaflet(
+                                options = leafletOptions(maxZoom = 5, minZoom = 3.75, zoomControl = F, zoomSnap = 0.25, zoomDelta = 0.25),
                                 data = subset_data) %>%
-                                setView(lng = -94.5, lat = 36.5, zoom = 4.25) %>%
+                                setView(lng = -94.5, lat = 36.5, zoom = 3.75) %>%
                                 addPolygons(
                                         fillColor = ~palette(selected_data),
                                         weight = 1,
@@ -269,6 +271,20 @@ server <- function(input, output, session) {
                                         } else {
                                                 formatC(selected_data, format = "f", big.mark = ",", digits = 1)
                                         })
+                                ) %>%
+                                addEasyButton(
+                                        easyButton(
+                                                icon = "fas fa-home",
+                                                title = "Original zoom",
+                                                position = "topleft",
+                                                onClick = JS(
+                                                        paste0(
+                                                                "function(btn, map) {
+                 map.fitBounds([[", 19, ",", -124, "], [", 50, ",", -67, "]])
+               }"
+                                                        )
+                                                )
+                                        )
                                 ) %>%
                                 addLegend(pal = palette_NA, 
                                           values = selected_data, 
@@ -307,9 +323,14 @@ server <- function(input, output, session) {
                                 map # return map
                         }})
         
+        # Redraw map when the app is resized
+        observeEvent(input$mapPanel_resize, {
+                leafletProxy("choroplethMap", session) %>% invalidateSize()
+        })
+        
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAP: BAR CHART ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
-        output$barChart <- renderPlot({
+        output$barChart <- renderGirafe({
                 # Filter data based on user selection
                 subset_data <- d.map %>% 
                         filter(year == input$selectedYear, group == gsub(" \\(No data\\)$", "", input$selectedGroupMap))
@@ -332,7 +353,7 @@ server <- function(input, output, session) {
                 ylim_lower <- if(min_val >= 0) 0 else min_val - .35*buffer
                 ylim_upper <- max_val + buffer
 
-                ggplot(subset_data, aes(x = reorder(area, get(input$selectedDataMap)), y = get(input$selectedDataMap), fill = selected_data)) +
+                p <- ggplot(subset_data, aes(x = reorder(area, get(input$selectedDataMap)), y = get(input$selectedDataMap), fill = selected_data)) +
                         geom_bar(stat = "identity", color = "grey", linewidth = 0.1) +
                         scale_fill_gradientn(colours = c("#F7FBFF", "#E1EDF8", "#CBDFF1", "#ACD0E6", "#83BADB", "#5AA1CF", "#3987C0", "#1D6AAF", "#084D96", "#08306B")) +
                         geom_text(aes(label = if(input$selectedDataMap == "value") {
@@ -351,7 +372,12 @@ server <- function(input, output, session) {
                                 panel.border = element_blank(), # Remove panel border 
                                 axis.text.y = element_text(size = 12),
                                 axis.title.x = element_text(size = 14),
-                                legend.position = "none")})}
+                                legend.position = "none")
+                girafe(ggobj = p, width_svg = 7, height_svg = 7)
+                
+        })
+        
+        }
 
 # Run the app
 shinyApp(ui = ui, server = server)

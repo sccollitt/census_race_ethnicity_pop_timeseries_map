@@ -6,69 +6,87 @@
 }
 
 
-body {
+body, .container-fluid {
   font-family: 'AvenirNext LT Pro Regular', sans-serif;
-    height: 100vh !important;
-}
-
-.container-fluid {
-    height: 100vh !important;
+  height: 100vh; /* Full height of the viewport */
+  margin: 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .shiny-fluid-row {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  flex-grow: 1; /* Allow rows to grow to fill available space */
+  display: flex; /* Apply flexbox to rows */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 #linePlotPanel {
-    margin-left: 0px;
-    margin-right: 0px;
-    height: 40vh !important;
+  flex-basis: 40%; /* Allocate 40% of the space to linePlotPanel */
+  display: flex; /* Use flexbox for the contents of the panel */
 }
 
 #mapPanel {
-    margin-left: 0px;
-    margin-right: 0px;
-    height: 60vh !important;
+  flex-basis: 60%; /* Allocate 60% of the space to mapPanel */
+  display: flex; /* Use flexbox for the contents of the panel */
 }
 
-/* If not using map tiles, show a white background */
-.leaflet-container {
+.leaflet-container, #linePlot {
+  font-family: 'AvenirNext LT Pro Regular', sans-serif;
+  height: 100%; /* Ensure these elements take the full height of their containers */
+  width: 100%; /* Ensure they take the full width as well */
   background-color: transparent !important;
-	    height: 60vh;
-  	    padding: 0 0 0 0;
+  padding: 0;
+  margin: 0;
 }
-
-#choroplethMap {
-    height: 60vh !important;
-}
-
-#barChart {
-    height: 60vh !important;
-    font-size: 14pt;
-}
-
-/* change color of sidepanel text background */
-         #textpanel {
-            background-color: transparent !important;            
-        }
-
 
 .leaflet-popup-tip {
     display: none !important;
 }
 
 .info.legend.leaflet-control {
+  font-family: 'AvenirNext LT Pro Regular', sans-serif;
       background-color: transparent !important;
       border: none !important;
       box-shadow: none !important;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
     }
 
 .info.legend.leaflet-control > :first-child {
             max-width: 100px;
             word-wrap: break-word;
-    .info.legend.leaflet-control > :forth-child + div {
+
+}
+
+.info.legend.leaflet-control > :forth-child + div {
       display: none;
   }
+
+.girafe_container_std {
+  font-family: 'AvenirNext LT Pro Regular', sans-serif;
+  height: 80% !important; /* Ensure these elements take the full height of their containers */
+  width: 100%; /* Ensure they take the full width as well */
+  background-color: transparent !important;
+  padding: 0;
+  margin: 0;
+}
+
+.girafe_container_std svg {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.girafe_container_std text {
+    font-family: 'AvenirNext LT Pro Regular', sans-serif !important;
+}
+
+.svg-wrapper {
+    position: relative;
+    width: 100%;
+}
 
